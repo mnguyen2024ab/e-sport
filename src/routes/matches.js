@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import {createMatchSchema, listMatchesQuerySchema} from "../src/validation/matches.js";
+import {createMatchSchema, listMatchesQuerySchema} from "../validation/matches.js";
 import {matches} from "../db/schema.js";
 import {db} from "../db/db.js";
-import {getMatchStatus} from "../src/utils/match-status.js";
+import {getMatchStatus} from "../utils/matches-status.js";
 
 import {desc} from "drizzle-orm";
 
@@ -16,8 +16,7 @@ matchRouter.get('/', async(req, res) => {
   if(!parsed.success) {
     return res.status(400).json({error: 'Invalid query', details: parsed.error.issues });
   }
-  let parsedData;
-  const limit = Math.min(parsedData.data.limit ?? 50, MAX_LIMIT);
+  const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
 
     try {
       const data = await db
