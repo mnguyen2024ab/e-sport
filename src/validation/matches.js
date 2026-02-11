@@ -14,26 +14,23 @@ export const matchIdParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-const isoDateSchema = z.string().refine((val) => {
-  const date = new Date(val);
-  return !isNaN(date.getTime()) && val === date.toISOString();
-}, {
-  message: 'Invalid ISO date string',
-});
+const isoDateString = z.iso.datetime();
 
 export const createMatchSchema = z.object({
   sport: z.string().min(1),
   homeTeam: z.string().min(1),
   awayTeam: z.string().min(1),
-  startTime: isoDateSchema,
-  endTime: isoDateSchema,
+  startTime: z.iso.datetime(),
+  endTime: z.iso.datetime(),
   homeScore: z.coerce.number().int().nonnegative().optional(),
   awayScore: z.coerce.number().int().nonnegative().optional(),
 }).superRefine((data, ctx) => {
-  if (new Date(data.endTime) <= new Date(data.startTime)) {
+  const start = new Date(data.startTime);
+  const end = new Date(data.endTime);
+  if (end <= start) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'endTime must be after startTime',
+      message: 'endTime must be chrnonologically after startTime',
       path: ['endTime'],
     });
   }
