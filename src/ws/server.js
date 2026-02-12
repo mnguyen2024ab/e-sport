@@ -28,17 +28,20 @@ export function attachWebSocketServer(server) {
 
   const interval = setInterval(() => {
       wss.clients.forEach((ws) => {
-          if (ws.isAlive === false) return ws.terminate();
+          if (ws.isAlive === false) {
+              ws.terminate();
+              return;
+          }
           ws.isAlive = false;
           ws.ping();
-      })}, 30000);
+      });
+      }, 30000);
 
-      wss.on('close', () => clearInterval(interval));
-  }
+          wss.on('close', () => clearInterval(interval));
 
-  function broadcastMatchCreated(match) {
-      broadcast(wss, { type: 'match_created', data: match });
-  }
+          function broadcastMatchCreated(match) {
+                  broadcast(wss, { type: 'match_created', data: match });
+             }
 
-  return { broadcastMatchCreated }
-
+     return { broadcastMatchCreated };
+    }
