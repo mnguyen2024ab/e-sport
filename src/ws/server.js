@@ -22,6 +22,8 @@ export function attachWebSocketServer(server) {
     const { pathname } = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
     if (pathname !== '/ws') {
+      socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
+      socket.destroy();
       return;
     }
 
