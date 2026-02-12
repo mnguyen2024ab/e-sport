@@ -10,26 +10,28 @@ export const matchRouter = Router();
 
 const MAX_LIMIT = 100;
 
-matchRouter.get('/', async(req, res) => {
+matchRouter.get('/', async (req, res) => {
   const parsed = listMatchesQuerySchema.safeParse(req.query);
-
-  if(!parsed.success) {
-    return res.status(400).json({error: 'Invalid query', details: parsed.error.issues });
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Invalid query',
+      details: parsed.error.issues
+    });
   }
+
   const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
 
-    try {
-      const data = await db
-          .select()
-          .from(matches)
-          .orderBy((desc(matches.createdAt)))
-          .limit(limit)
+  try {
+    const data = await db
+        .select()
+        .from(matches)
+        .orderBy(desc(matches.createdAt))
+        .limit(limit);
 
-      res.json({ data });
-
-    } catch (e) {
-      res.status(500).json({ error: 'Failed to fetch matches' });
-    }
+    res.json({ data });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch matches' });
+  }
 });
 
 
@@ -51,8 +53,12 @@ matchRouter.post('/', async(req, res) => {
       status: getMatchStatus(startTime, endTime),
     }).returning();
 
-    res.status(201).json({ data: event});
+    if (res.app.locals.broadcastMatchCreated) {
+      res.app.locals.broadcastMatchCreated(event);
+    }
+    res.status(201).json({ data: event });
+
   } catch (e) {
-    res.status(500).json({error: 'Failed to create match', details: JSON.stringify(e) });
-  }
-})
+  res.status(500).json({ error: 'Failed to create matches', details: JSON.stringify(e) });}
+}
+
