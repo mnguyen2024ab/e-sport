@@ -127,23 +127,20 @@ export function attachWebSocketServer(server) {
       socket.isAlive = true;
     });
 
-    socket.subscriptions = new Set();
-
     sendJson(socket, { type: 'Welcome' });
 
     socket.on('message', (data) => {
       handleMessage(socket, data);
     });
 
-    socket.on('error', () => {
+    socket.on('error', (err) => {
+      console.error('WebSocket socket error:', err);
       socket.terminate();
     });
 
     socket.on('close', () => {
       cleanupSubscriptions(socket);
     });
-
-    socket.on('error', console.error);
   });
 
   const interval = setInterval(() => {

@@ -36,7 +36,7 @@ commentaryRouter.get("/", async (req, res) => {
       .from(commentary)
       .where(eq(commentary.matchId, paramResult.data.id))
       .orderBy(desc(commentary.createdAt))
-      .limit(limit);
+      .limit(safeLimit);
 
     res.json({ data });
   } catch (e) {
@@ -75,7 +75,7 @@ commentaryRouter.post("/", async (req, res) => {
 
     // Broadcast the new commentary via WebSocket
     if (req.app.locals.broadcastMatchCommentary) {
-      req.app.locals.broadcastMatchCommentary(result.data.id, result);
+      req.app.locals.broadcastMatchCommentary(paramResult.data.id, result);
     }
 
     res.status(201).json({ data: result });
